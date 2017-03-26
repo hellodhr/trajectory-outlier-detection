@@ -56,4 +56,49 @@ public class Database {
 		}
 	}
 	
+	public List<Trajectory> findTrajectoriesInRegions(Region regionStart, Region regionEnd) {
+		List<Trajectory> trajectories = new ArrayList<>();
+		
+		for(Trajectory trajectory : this.trajectories) {
+			
+			List<Point> edgesR1 = regionStart.getInnerPoints(trajectory);
+			List<Point> edgesR2 = regionEnd.getInnerPoints(trajectory);
+			if(!edgesR1.isEmpty() && !edgesR2.isEmpty()) {
+				List<Point> selectedPoints = this.getLessDistancePoints(edgesR1, edgesR2);
+				if(selectedPoints.size() == 2) {
+					int startPoint = trajectory.getPoints().indexOf(selectedPoints.get(0));
+					int endPoint = trajectory.getPoints().indexOf(selectedPoints.get(1));
+					if(startPoint > endPoint) {
+						int temp = endPoint;
+						startPoint = endPoint;
+						endPoint = temp;
+					}
+					Trajectory traj = new Trajectory();
+					traj.setName(trajectory.getName());
+					traj.getPoints().addAll(trajectory.getPoints().subList(startPoint, endPoint + 1));
+					trajectories.add(traj);
+				}
+			}			
+		}
+		
+		return trajectories;
+	}
+	
+	private List<Point> getLessDistancePoints(List<Point> pts1, List<Point> pts2) {
+		List<Point> points = new ArrayList<>();
+		Point p1S = pts1.get(0), p2S = pts2.get(0);
+		double distance = p1S.calcDistance(p2S);
+		for(int i = 0; i < pts1.size(); i++) {
+			for(int j = 0; j < pts2.size(); j++) {
+				if(pts1.get(i).calcDistance(pts2.get(j)) < distance) {
+					p1S = pts1.get(i);
+					p2S = pts2.get(j);
+				}
+			}
+		}
+		points.add(p1S);
+		points.add(p2S);
+		return points;
+	}
+	
 }

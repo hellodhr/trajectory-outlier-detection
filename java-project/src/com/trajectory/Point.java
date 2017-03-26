@@ -43,4 +43,8 @@ public class Point {
 		this.time = time;
 	}
 	
+	public double calcDistance(Point target) {
+		return Math.sqrt(Math.pow(this.getLat() - target.getLat(), 2) + Math.pow(this.getLng() - target.getLng(), 2));
+	}
+	
 }
