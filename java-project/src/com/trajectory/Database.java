@@ -15,6 +15,8 @@ public class Database {
 	
 	private List<Trajectory> trajectories = new ArrayList<>();
 	
+	private List<Region> regions = new ArrayList<>();
+	
 	public Database(String path) {
 		super();
 		this.path = path;
@@ -25,38 +27,57 @@ public class Database {
 			File f = new File(path);
 			ArrayList<String> names = new ArrayList<String>(Arrays.asList(f.list()));
 			for(int i = 0; i < names.size(); i++) {
-				Trajectory trajectory = new Trajectory();
-				trajectory.setName(names.get(i));
-				File file = new File(path + "/" + names.get(i));
-				FileReader fileReader = new FileReader(file);
-				BufferedReader bufferedReader = new BufferedReader(fileReader);
-				String line;
-				boolean fileHeaderProcessed = false;
-				while ((line = bufferedReader.readLine()) != null) {
-					if(!fileHeaderProcessed && line.length() > 0) {
-						fileHeaderProcessed = true;
-					} else if(fileHeaderProcessed && line.length() > 0) {
-						trajectory.getPoints().add(new Point(
-							Double.valueOf(line.split(";")[0]), 
+				if(names.get(i).equals("regions.csv")) {
+					File file = new File(path + "/" + names.get(i));
+					FileReader fileReader = new FileReader(file);
+					BufferedReader bufferedReader = new BufferedReader(fileReader);
+					String line;
+					while ((line = bufferedReader.readLine()) != null) {
+						regions.add(new Region(
+							line.split(";")[0], 
 							Double.valueOf(line.split(";")[1]), 
-							Double.valueOf(line.split(";")[2])));
+							Double.valueOf(line.split(";")[2]),
+							Double.valueOf(line.split(";")[3])));
 					}
+					bufferedReader.close();
+				} else {
+					Trajectory trajectory = new Trajectory();
+					trajectory.setName(names.get(i));
+					File file = new File(path + "/" + names.get(i));
+					FileReader fileReader = new FileReader(file);
+					BufferedReader bufferedReader = new BufferedReader(fileReader);
+					String line;
+					boolean fileHeaderProcessed = false;
+					while ((line = bufferedReader.readLine()) != null) {
+						if(!fileHeaderProcessed && line.length() > 0) {
+							fileHeaderProcessed = true;
+						} else if(fileHeaderProcessed && line.length() > 0) {
+							trajectory.getPoints().add(new Point(
+								Double.valueOf(line.split(";")[0]), 
+								Double.valueOf(line.split(";")[1]), 
+								Double.valueOf(line.split(";")[2])));
+						}
+					}
+					Collections.sort(trajectory.getPoints(), new Comparator<Point>() {
+						@Override
+						public int compare(Point o1, Point o2) {
+							return (int) (o1.getTime() - o2.getTime());
+						}
+					});
+					this.trajectories.add(trajectory);
+					bufferedReader.close();
 				}
-				Collections.sort(trajectory.getPoints(), new Comparator<Point>() {
-					@Override
-					public int compare(Point o1, Point o2) {
-						return (int) (o1.getTime() - o2.getTime());
-					}
-				});
-				this.trajectories.add(trajectory);
-				bufferedReader.close();
 			}
 		} catch (Exception e) {
 			System.exit(1);
 		}
 	}
 	
-	public List<Trajectory> findTrajectoriesInRegions(Region regionStart, Region regionEnd) {
+	public List<Region> getRegions() {
+		return regions;
+	}
+	
+	public List<Trajectory> findCandidates(Region regionStart, Region regionEnd) {
 		List<Trajectory> trajectories = new ArrayList<>();
 		
 		for(Trajectory trajectory : this.trajectories) {
@@ -99,6 +120,35 @@ public class Database {
 		points.add(p1S);
 		points.add(p2S);
 		return points;
+	}
+	
+	public List<Trajectory> findStandards(List<Trajectory> candidates, double maxDist, int minSup) {
+		List<Trajectory> standarts = new ArrayList<>();
+		for(Trajectory candidate : candidates) {
+			if(this.findPointWithLessNeighborhood(candidate, maxDist) >= minSup) {
+				standarts.add(candidate);
+			}
+		}
+		return standarts;
+	}
+	
+	private int findPointWithLessNeighborhood(Trajectory trajectory, double maxDist) {
+		int qtd = -1;
+		for(Point p : trajectory.getPoints()) {
+			int nghbd = this.countNeighborhood(trajectory, p, maxDist);
+			if(qtd == -1) {
+				qtd = nghbd;
+			} else if(nghbd < qtd) {
+				qtd = nghbd;
+			}
+		}
+		return qtd;
+	}
+	
+	private int countNeighborhood(Trajectory t, Point p, double maxDist) {
+		int qtd = 0;
+		
+		return qtd;
 	}
 	
 }

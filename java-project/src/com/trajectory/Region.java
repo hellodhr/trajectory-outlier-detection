@@ -14,6 +14,15 @@ public class Region {
 	public Region() {
 		super();
 	}
+	
+	public Region(String regionName, double lat, double lng, double radius) {
+		Point point = new Point();
+		point.setLat(lat);
+		point.setLng(lng);
+		this.setRadius(radius);
+		this.setCenterRegion(point);
+		this.setRegionName(regionName);
+	}
 
 	public String getRegionName() {
 		return regionName;
@@ -50,4 +59,10 @@ public class Region {
 		return points;
 	}
 	
+	@Override
+	public String toString() {
+		return "drawCircle(" + this.getCenterRegion().getLat() + "," + 
+				this.getCenterRegion().getLng() + "," + 
+				this.getRadius() + ");";
+	}
 }

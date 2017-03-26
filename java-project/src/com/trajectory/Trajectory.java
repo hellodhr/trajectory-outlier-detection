@@ -30,4 +30,19 @@ public class Trajectory {
 		this.points = points;
 	}
 	
+	@Override
+	public String toString() {
+		String output = "drawPoints([";
+		for(int i = 0; i < this.getPoints().size(); i++) {
+			output += "{ lat: " + this.getPoints().get(i).getLat() + ", lng: " + this.getPoints().get(i).getLng();
+			if(i != this.getPoints().size() - 1) {
+				output += " },";
+			} else {
+				output += " }";
+			}
+		}
+		output += "]);";
+		return output;
+	}
+	
 }
