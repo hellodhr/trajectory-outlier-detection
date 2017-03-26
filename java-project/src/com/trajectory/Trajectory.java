@@ -9,6 +9,8 @@ public class Trajectory {
 	
 	private List<Point> points;
 	
+	private boolean standard = false;
+	
 	public Trajectory() {
 		super();
 	}
@@ -30,6 +32,14 @@ public class Trajectory {
 		this.points = points;
 	}
 	
+	public boolean isStandard() {
+		return standard;
+	}
+
+	public void setStandard(boolean standard) {
+		this.standard = standard;
+	}
+
 	@Override
 	public String toString() {
 		String output = "drawPoints([";
@@ -41,7 +51,13 @@ public class Trajectory {
 				output += " }";
 			}
 		}
-		output += "]);";
+		output += "],'";
+		if(this.isStandard()) {
+			output += "#AA0000";
+		} else {
+			output += "#00AA00";
+		}
+		output += "');";
 		return output;
 	}
 	

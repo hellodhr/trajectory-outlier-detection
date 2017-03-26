@@ -64,12 +64,14 @@ public class Database {
 							return (int) (o1.getTime() - o2.getTime());
 						}
 					});
-					this.trajectories.add(trajectory);
+					if(trajectory.getPoints().size() > 1) {
+						this.trajectories.add(trajectory);
+					}
 					bufferedReader.close();
 				}
 			}
 		} catch (Exception e) {
-			System.exit(1);
+			e.printStackTrace();
 		}
 	}
 	
@@ -125,29 +127,33 @@ public class Database {
 	public List<Trajectory> findStandards(List<Trajectory> candidates, double maxDist, int minSup) {
 		List<Trajectory> standarts = new ArrayList<>();
 		for(Trajectory candidate : candidates) {
-			if(this.findPointWithLessNeighborhood(candidate, maxDist) >= minSup) {
+			if(this.findPointWithLessNeighborhood(candidates, candidate, maxDist) >= minSup) {
+				candidate.setStandard(true);
 				standarts.add(candidate);
 			}
 		}
 		return standarts;
 	}
 	
-	private int findPointWithLessNeighborhood(Trajectory trajectory, double maxDist) {
+	private int findPointWithLessNeighborhood(List<Trajectory> candidates, Trajectory trajectory, double maxDist) {
 		int qtd = -1;
 		for(Point p : trajectory.getPoints()) {
-			int nghbd = this.countNeighborhood(trajectory, p, maxDist);
+			int nghbd = 0;
+			for(Trajectory candidate : candidates) {
+				if(candidate != trajectory) {
+					for(Point candidateP : candidate.getPoints()) {
+						if(candidateP.calcDistance(p) < maxDist) {
+							nghbd++;
+						}
+					}
+				}
+			}
 			if(qtd == -1) {
 				qtd = nghbd;
 			} else if(nghbd < qtd) {
 				qtd = nghbd;
 			}
 		}
-		return qtd;
-	}
-	
-	private int countNeighborhood(Trajectory t, Point p, double maxDist) {
-		int qtd = 0;
-		
 		return qtd;
 	}
 	
